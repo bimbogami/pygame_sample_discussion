@@ -1,32 +1,37 @@
-from numpy import random
 import pygame
+from numpy import random
+
 pygame.init()
 
-screen = pygame.display.set_mode((800, 700))
-pygame.display.set_caption("sample")
+WIDTH, HEIGHT = 800, 700
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Spanning Background Effect")
 clock = pygame.time.Clock()
-# Constants
+
+bg_image = pygame.image.load("assets/bg2.jpg").convert()
+
+WORLD_WIDTH = 2000
+WORLD_HEIGHT = 1000
+bg_image = pygame.transform.scale(bg_image, (WORLD_WIDTH, WORLD_HEIGHT))
+
 grav = 0.5
 jump = -15
 spd = 7
+
 y_vel = 0
-
-# Platform 
-platforms = [
-    pygame.Rect(0, 600, 800, 200),
-    pygame.Rect(200, 450, 200, 50)   
-]
-
-# Player
+on_ground = True
+scroll_x = 0
+scroll_y = 0
 
 player = pygame.Rect(370, 320, 50, 50)
-on_ground = True
+platforms = [
+    pygame.Rect(0, 600, 2000, 200),
+    pygame.Rect(200, 450, 200, 50),
+    pygame.Rect(600, 300, 200, 50),
+    pygame.Rect(1000, 200, 300, 50)
+]
 
-r = 255
-g = 0
-b = 255
-
-
+r, g, b = 255, 0, 255
 running = True
 
 while running:
@@ -35,39 +40,42 @@ while running:
             running = False 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-               r = random.randint(0, 255)
-               g = random.randint(0, 255)
-               b = random.randint(0, 255)
+                r, g, b = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
             if event.key == pygame.K_UP and on_ground:
                 y_vel = jump
-                
 
     y_vel += grav
     player.y += y_vel
     on_ground = False
+    
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
         player.x -= spd
     if keys[pygame.K_RIGHT]:
         player.x += spd
 
-
-
-    #pygame.key.set_repeat(10)
-
     for platform in platforms:
-        pygame.Rect(platform)
         if player.colliderect(platform):
-            if y_vel > 0:
+            if y_vel > 0: 
                 player.bottom = platform.top
                 y_vel = 0
                 on_ground = True
 
+    scroll_x += (player.x - scroll_x - WIDTH/2 + player.width/2) / 15
+    scroll_y += (player.y - scroll_y - HEIGHT/2 + player.height/2) / 15
 
     screen.fill((0, 0, 0))
+
+    screen.blit(bg_image, (-scroll_x, -scroll_y))
+
     for platform in platforms:
-        pygame.draw.rect(screen, (4, 89, 0), platform)
-    pygame.draw.rect(screen, (r, g, b), player)
-    clock.tick(60)
+        draw_rect = pygame.Rect(platform.x - scroll_x, platform.y - scroll_y, platform.width, platform.height)
+        pygame.draw.rect(screen, (4, 89, 0), draw_rect)
+
+    player_draw_rect = pygame.Rect(player.x - scroll_x, player.y - scroll_y, player.width, player.height)
+    pygame.draw.rect(screen, (r, g, b), player_draw_rect)
+
     pygame.display.flip()
+    clock.tick(60)
+
 pygame.quit()
