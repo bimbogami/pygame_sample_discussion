@@ -35,7 +35,7 @@ clock = pygame.time.Clock()
 #player 
 player = pygame.Rect(640, 360, 66, 66)
 
-cat = pygame.image.load("mewo.webp")
+cat = pygame.image.load("assets/mewo.webp")
 cat = pygame.transform.scale(cat, (cat.get_width()/4.5, cat.get_height()/4.5))
 
 run = True
